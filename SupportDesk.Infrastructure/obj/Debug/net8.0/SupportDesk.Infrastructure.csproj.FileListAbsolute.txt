@@ -1,0 +1,15 @@
+/Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/bin/Debug/net8.0/SupportDesk.Infrastructure.deps.json
+/Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/bin/Debug/net8.0/SupportDesk.Infrastructure.dll
+/Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/bin/Debug/net8.0/SupportDesk.Infrastructure.pdb
+/Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/bin/Debug/net8.0/SupportDesk.Core.dll
+/Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/bin/Debug/net8.0/SupportDesk.Core.pdb
+/Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/obj/Debug/net8.0/SupportDesk.Infrastructure.csproj.AssemblyReference.cache
+/Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/obj/Debug/net8.0/SupportDesk.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+/Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/obj/Debug/net8.0/SupportDesk.Infrastructure.AssemblyInfoInputs.cache
+/Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/obj/Debug/net8.0/SupportDesk.Infrastructure.AssemblyInfo.cs
+/Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/obj/Debug/net8.0/SupportDesk.Infrastructure.csproj.CoreCompileInputs.cache
+/Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/obj/Debug/net8.0/SupportD.6A310162.Up2Date
+/Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/obj/Debug/net8.0/SupportDesk.Infrastructure.dll
+/Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/obj/Debug/net8.0/refint/SupportDesk.Infrastructure.dll
+/Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/obj/Debug/net8.0/SupportDesk.Infrastructure.pdb
+/Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/obj/Debug/net8.0/ref/SupportDesk.Infrastructure.dll

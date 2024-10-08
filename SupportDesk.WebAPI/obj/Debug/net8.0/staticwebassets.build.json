@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "4FBphoW60zuc5NoLTDnJNqNcFaiEjOWW/XGUQ2OkiXk=",
+  "Source": "SupportDesk.WebAPI",
+  "BasePath": "_content/SupportDesk.WebAPI",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

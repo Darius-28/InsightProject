@@ -1,0 +1,313 @@
+{
+  "format": 1,
+  "restore": {
+    "/Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/SupportDesk.WebAPI.csproj": {}
+  },
+  "projects": {
+    "/Users/darius_s/Documents/InsightProject/SupportDesk.Application/SupportDesk.Application.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/darius_s/Documents/InsightProject/SupportDesk.Application/SupportDesk.Application.csproj",
+        "projectName": "SupportDesk.Application",
+        "projectPath": "/Users/darius_s/Documents/InsightProject/SupportDesk.Application/SupportDesk.Application.csproj",
+        "packagesPath": "/Users/darius_s/.nuget/packages/",
+        "outputPath": "/Users/darius_s/Documents/InsightProject/SupportDesk.Application/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/darius_s/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "/Users/darius_s/Documents/InsightProject/SupportDesk.Core/SupportDesk.Core.csproj": {
+                "projectPath": "/Users/darius_s/Documents/InsightProject/SupportDesk.Core/SupportDesk.Core.csproj"
+              },
+              "/Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/SupportDesk.Infrastructure.csproj": {
+                "projectPath": "/Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/SupportDesk.Infrastructure.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.10, )"
+            },
+            "Microsoft.EntityFrameworkCore.Sqlite": {
+              "target": "Package",
+              "version": "[8.0.10, )"
+            },
+            "Microsoft.Extensions.Configuration": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.Extensions.Configuration.Json": {
+              "target": "Package",
+              "version": "[8.0.1, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.401/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/Users/darius_s/Documents/InsightProject/SupportDesk.Core/SupportDesk.Core.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/darius_s/Documents/InsightProject/SupportDesk.Core/SupportDesk.Core.csproj",
+        "projectName": "SupportDesk.Core",
+        "projectPath": "/Users/darius_s/Documents/InsightProject/SupportDesk.Core/SupportDesk.Core.csproj",
+        "packagesPath": "/Users/darius_s/.nuget/packages/",
+        "outputPath": "/Users/darius_s/Documents/InsightProject/SupportDesk.Core/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/darius_s/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.401/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/SupportDesk.Infrastructure.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/SupportDesk.Infrastructure.csproj",
+        "projectName": "SupportDesk.Infrastructure",
+        "projectPath": "/Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/SupportDesk.Infrastructure.csproj",
+        "packagesPath": "/Users/darius_s/.nuget/packages/",
+        "outputPath": "/Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/darius_s/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "/Users/darius_s/Documents/InsightProject/SupportDesk.Core/SupportDesk.Core.csproj": {
+                "projectPath": "/Users/darius_s/Documents/InsightProject/SupportDesk.Core/SupportDesk.Core.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.10, )"
+            },
+            "Microsoft.EntityFrameworkCore.Sqlite": {
+              "target": "Package",
+              "version": "[8.0.10, )"
+            },
+            "Microsoft.Extensions.Configuration": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.Extensions.Configuration.Json": {
+              "target": "Package",
+              "version": "[8.0.1, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.401/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/SupportDesk.WebAPI.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/SupportDesk.WebAPI.csproj",
+        "projectName": "SupportDesk.WebAPI",
+        "projectPath": "/Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/SupportDesk.WebAPI.csproj",
+        "packagesPath": "/Users/darius_s/.nuget/packages/",
+        "outputPath": "/Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/darius_s/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "/Users/darius_s/Documents/InsightProject/SupportDesk.Application/SupportDesk.Application.csproj": {
+                "projectPath": "/Users/darius_s/Documents/InsightProject/SupportDesk.Application/SupportDesk.Application.csproj"
+              },
+              "/Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/SupportDesk.Infrastructure.csproj": {
+                "projectPath": "/Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/SupportDesk.Infrastructure.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.AspNetCore.OpenApi": {
+              "target": "Package",
+              "version": "[8.0.8, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.10, )"
+            },
+            "Swashbuckle.AspNetCore": {
+              "target": "Package",
+              "version": "[6.4.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.401/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
