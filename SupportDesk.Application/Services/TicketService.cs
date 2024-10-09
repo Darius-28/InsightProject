@@ -7,16 +7,21 @@ using SupportDesk.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using SupportDesk.Core.Entities; // Assuming Ticket is defined here
 using SupportDesk.Infrastructure.Data; // Assuming SupportDeskDbContext is defined here
+using Microsoft.Extensions.Configuration;
 
 namespace SupportDesk.Application.Services
 {
     public class TicketService : ITicketService
     {
         private readonly SupportDeskDbContext _context;
+        private readonly IEmailService _emailService;
+        private readonly IConfiguration _configuration;
 
-        public TicketService(SupportDeskDbContext context)
+        public TicketService(SupportDeskDbContext context, IEmailService emailService, IConfiguration configuration)
         {
             _context = context;
+            _emailService = emailService;
+            _configuration = configuration;
         }
 
         // Create
@@ -36,6 +41,9 @@ namespace SupportDesk.Application.Services
             await _context.SaveChangesAsync();
             
             ticketDto.Id = ticket.Id; // Update the DTO with the new ID
+
+            // Send email notification
+            await _emailService.SendTicketCreationEmailAsync(ticketDto, _configuration["NotificationEmail"]);
         }
 
         // Read

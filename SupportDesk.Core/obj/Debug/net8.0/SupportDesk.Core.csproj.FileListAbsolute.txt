@@ -9,3 +9,4 @@
 /Users/darius_s/Documents/InsightProject/SupportDesk.Core/obj/Debug/net8.0/refint/SupportDesk.Core.dll
 /Users/darius_s/Documents/InsightProject/SupportDesk.Core/obj/Debug/net8.0/SupportDesk.Core.pdb
 /Users/darius_s/Documents/InsightProject/SupportDesk.Core/obj/Debug/net8.0/ref/SupportDesk.Core.dll
+/Users/darius_s/Documents/InsightProject/SupportDesk.Core/obj/Debug/net8.0/SupportDesk.Core.sourcelink.json

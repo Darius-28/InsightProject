@@ -140,3 +140,7 @@
 /Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/obj/Debug/net8.0/SupportDesk.WebAPI.pdb
 /Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/obj/Debug/net8.0/SupportDesk.WebAPI.genruntimeconfig.cache
 /Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/obj/Debug/net8.0/ref/SupportDesk.WebAPI.dll
+/Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/obj/Debug/net8.0/SupportDesk.WebAPI.sourcelink.json
+/Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/bin/Debug/net8.0/BouncyCastle.Cryptography.dll
+/Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/bin/Debug/net8.0/MailKit.dll
+/Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/bin/Debug/net8.0/MimeKit.dll

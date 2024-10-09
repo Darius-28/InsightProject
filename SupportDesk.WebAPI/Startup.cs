@@ -25,6 +25,17 @@ namespace SupportDesk.WebAPI
             services.AddScoped<ITicketService, TicketService>();
             services.AddDbContext<SupportDeskDbContext>(options =>
                 options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddScoped<IEmailService, EmailService>();
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowReactApp",
+                    builder => builder
+                        .WithOrigins("http://localhost:3000")
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials());
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -34,8 +45,16 @@ namespace SupportDesk.WebAPI
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseCors("AllowReactApp");
+
             app.UseRouting();
-            app.UseEndpoints(endpoints => endpoints.MapControllers());
+
+            // Other middleware...
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
     }
 }
