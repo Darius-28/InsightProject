@@ -46,6 +46,12 @@
           }
         }
       },
+      "Microsoft.AspNetCore.Http.Features/5.0.17": {
+        "dependencies": {
+          "Microsoft.Extensions.Primitives": "8.0.0",
+          "System.IO.Pipelines": "6.0.3"
+        }
+      },
       "Microsoft.AspNetCore.OpenApi/8.0.8": {
         "dependencies": {
           "Microsoft.OpenApi": "1.4.3"
@@ -808,6 +814,7 @@
       "SupportDesk.Application/1.0.0": {
         "dependencies": {
           "MailKit": "4.8.0",
+          "Microsoft.AspNetCore.Http.Features": "5.0.17",
           "Microsoft.EntityFrameworkCore": "8.0.10",
           "Microsoft.EntityFrameworkCore.Sqlite": "8.0.10",
           "Microsoft.Extensions.Configuration": "8.0.0",
@@ -874,6 +881,13 @@
       "sha512": "sha512-zZ1UoM4FUnSFUJ9fTl5CEEaejR0DNP6+FDt1OfXnjg4igZntcir1tg/8Ufd6WY5vrpmvToAjluYqjVM24A+5lA==",
       "path": "mailkit/4.8.0",
       "hashPath": "mailkit.4.8.0.nupkg.sha512"
+    },
+    "Microsoft.AspNetCore.Http.Features/5.0.17": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-3jG2xS+dx8DDCGV/F+STdPTg89lX3ao3dF/VEPvJaz3wzBIjuadipTtYNEXDIVuOPZwb6jdmhrX9jkzOIBm5cw==",
+      "path": "microsoft.aspnetcore.http.features/5.0.17",
+      "hashPath": "microsoft.aspnetcore.http.features.5.0.17.nupkg.sha512"
     },
     "Microsoft.AspNetCore.OpenApi/8.0.8": {
       "type": "package",

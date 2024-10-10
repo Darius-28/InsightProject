@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace SupportDesk.Core.Entities
@@ -12,5 +13,7 @@ namespace SupportDesk.Core.Entities
         public string Priority { get; set; }
         public string Email { get; set; }
         public DateTime CreatedAt { get; set; }
+        public string StepsToReproduce { get; set; }
+        public List<string> AttachmentPaths { get; set; } = new List<string>();
     }
 }

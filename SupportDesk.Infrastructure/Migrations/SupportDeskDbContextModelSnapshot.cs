@@ -23,6 +23,9 @@ namespace SupportDesk.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("AttachmentPaths")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
@@ -33,6 +36,9 @@ namespace SupportDesk.Infrastructure.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Priority")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StepsToReproduce")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Title")

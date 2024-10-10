@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using SupportDesk.Core.Entities; // Assuming Ticket is defined here
 using SupportDesk.Infrastructure.Data; // Assuming SupportDeskDbContext is defined here
 using Microsoft.Extensions.Configuration;
+using System.IO;
 
 namespace SupportDesk.Application.Services
 {
@@ -25,25 +26,59 @@ namespace SupportDesk.Application.Services
         }
 
         // Create
-        public async Task CreateTicketAsync(TicketDto ticketDto)
+        public async Task<TicketDto> CreateTicketAsync(TicketDto ticketDto)
         {
             var ticket = new Ticket
             {
-                Id = Guid.NewGuid(), // Generate a new Guid
+                Id = Guid.NewGuid(),
                 Title = ticketDto.Title,
                 Description = ticketDto.Description,
                 Priority = ticketDto.Priority,
                 Email = ticketDto.Email,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                StepsToReproduce = ticketDto.StepsToReproduce,
+                AttachmentPaths = new List<string>()
             };
+
+            ticketDto.AttachmentInfos = new List<AttachmentInfo>();
+
+            if (ticketDto.Attachments != null && ticketDto.Attachments.Any())
+            {
+                var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+                Directory.CreateDirectory(uploadPath);
+
+                foreach (var file in ticketDto.Attachments)
+                {
+                    if (file.Length > 0)
+                    {
+                        var fileName = Path.GetRandomFileName() + Path.GetExtension(file.FileName);
+                        var filePath = Path.Combine(uploadPath, fileName);
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await file.CopyToAsync(stream);
+                        }
+                        ticket.AttachmentPaths.Add(filePath);
+                        ticketDto.AttachmentPaths.Add(filePath);
+                        ticketDto.AttachmentInfos.Add(new AttachmentInfo 
+                        { 
+                            FileName = file.FileName, 
+                            FileSize = file.Length 
+                        });
+                    }
+                }
+            }
 
             _context.Tickets.Add(ticket);
             await _context.SaveChangesAsync();
             
-            ticketDto.Id = ticket.Id; // Update the DTO with the new ID
+            ticketDto.Id = ticket.Id;
 
-            // Send email notification
             await _emailService.SendTicketCreationEmailAsync(ticketDto, _configuration["NotificationEmail"]);
+
+            // Clear the Attachments property as it's not needed in the response
+            ticketDto.Attachments = null;
+
+            return ticketDto;
         }
 
         // Read
@@ -58,7 +93,9 @@ namespace SupportDesk.Application.Services
                 Title = ticket.Title,
                 Description = ticket.Description,
                 Priority = ticket.Priority,
-                Email = ticket.Email
+                Email = ticket.Email,
+                StepsToReproduce = ticket.StepsToReproduce,
+                AttachmentPaths = ticket.AttachmentPaths
             };
         }
 
@@ -71,16 +108,18 @@ namespace SupportDesk.Application.Services
                     Title = ticket.Title,
                     Description = ticket.Description,
                     Priority = ticket.Priority,
-                    Email = ticket.Email
+                    Email = ticket.Email,
+                    StepsToReproduce = ticket.StepsToReproduce,
+                    AttachmentPaths = ticket.AttachmentPaths
                 })
                 .ToListAsync();
         }
 
         // Update
-        public async Task<TicketDto> UpdateTicketAsync(TicketDto ticketDto)
+        public async Task UpdateTicketAsync(TicketDto ticketDto)
         {
             var ticket = await _context.Tickets.FindAsync(ticketDto.Id);
-            if (ticket == null) return null;
+            if (ticket == null) return;
 
             ticket.Title = ticketDto.Title;
             ticket.Description = ticketDto.Description;
@@ -89,8 +128,6 @@ namespace SupportDesk.Application.Services
 
             _context.Tickets.Update(ticket);
             await _context.SaveChangesAsync();
-
-            return ticketDto;
         }
 
         // Delete

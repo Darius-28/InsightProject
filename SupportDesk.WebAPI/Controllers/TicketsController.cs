@@ -3,6 +3,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using SupportDesk.Application.DTOs;
 using SupportDesk.Application.Interfaces;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using System.Linq;
 
 namespace SupportDesk.WebAPI.Controllers
 {
@@ -18,10 +21,10 @@ namespace SupportDesk.WebAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateTicket([FromBody] TicketDto ticketDto)
+        public async Task<IActionResult> CreateTicket([FromForm] TicketDto ticketDto)
         {
-            await _ticketService.CreateTicketAsync(ticketDto);
-            return CreatedAtAction(nameof(GetTicketById), new { id = ticketDto.Id }, ticketDto);
+            var createdTicket = await _ticketService.CreateTicketAsync(ticketDto);
+            return CreatedAtAction(nameof(GetTicketById), new { id = createdTicket.Id }, createdTicket);
         }
 
         [HttpGet("{id}")]
@@ -43,8 +46,8 @@ namespace SupportDesk.WebAPI.Controllers
         public async Task<IActionResult> UpdateTicket(Guid id, [FromBody] TicketDto ticketDto)
         {
             if (id != ticketDto.Id) return BadRequest();
-            var updatedTicket = await _ticketService.UpdateTicketAsync(ticketDto);
-            return Ok(updatedTicket);
+            await _ticketService.UpdateTicketAsync(ticketDto);
+            return Ok(ticketDto);
         }
 
         [HttpDelete("{id}")]

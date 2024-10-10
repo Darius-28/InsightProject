@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using MailKit.Net.Smtp;
@@ -27,15 +28,42 @@ namespace SupportDesk.Application.Services
             message.To.Add(new MailboxAddress("", recipientEmail));
             message.Subject = $"New Ticket Created: {ticket.Title}";
 
-            message.Body = new TextPart("plain")
+            var builder = new BodyBuilder();
+            builder.TextBody = $"A new ticket has been created:\n\n" +
+                               $"ID: {ticket.Id}\n" +
+                               $"Title: {ticket.Title}\n" +
+                               $"Description: {ticket.Description}\n" +
+                               $"Priority: {ticket.Priority}\n" +
+                               $"Email: {ticket.Email}\n";
+
+            // Check if Steps to Reproduce is provided
+            if (!string.IsNullOrWhiteSpace(ticket.StepsToReproduce))
             {
-                Text = $"A new ticket has been created:\n\n" +
-                       $"ID: {ticket.Id}\n" +
-                       $"Title: {ticket.Title}\n" +
-                       $"Description: {ticket.Description}\n" +
-                       $"Priority: {ticket.Priority}\n" +
-                       $"Email: {ticket.Email}\n"
-            };
+                builder.TextBody += $"Steps to Reproduce: {ticket.StepsToReproduce}\n\n";
+            }
+            else
+            {
+                builder.TextBody += "Steps to Reproduce: No steps were provided.\n\n";
+            }
+
+            if (ticket.AttachmentPaths != null && ticket.AttachmentPaths.Any())
+            {
+                builder.TextBody += "Attachments:\n";
+                foreach (var attachmentPath in ticket.AttachmentPaths)
+                {
+                    var fileName = Path.GetFileName(attachmentPath);
+                    var attachment = builder.Attachments.Add(attachmentPath);
+                    attachment.ContentId = GenerateContentId();
+                    var fileInfo = new FileInfo(attachmentPath);
+                    builder.TextBody += $"- {fileName} ({FormatFileSize(fileInfo.Length)})\n";
+                }
+            }
+            else
+            {
+                builder.TextBody += "No attachments were included with this ticket.";
+            }
+
+            message.Body = builder.ToMessageBody();
 
             using var client = new SmtpClient();
             try
@@ -52,6 +80,24 @@ namespace SupportDesk.Application.Services
                 Console.WriteLine($"Error sending email: {ex.Message}");
                 throw; // Re-throw the exception to be handled by the caller
             }
+        }
+
+        private string GenerateContentId()
+        {
+            return $"{Guid.NewGuid().ToString()}@supportdesk.com";
+        }
+
+        private string FormatFileSize(long bytes)
+        {
+            string[] suffixes = { "B", "KB", "MB", "GB", "TB", "PB" };
+            int counter = 0;
+            decimal number = (decimal)bytes;
+            while (Math.Round(number / 1024) >= 1)
+            {
+                number = number / 1024;
+                counter++;
+            }
+            return string.Format("{0:n1}{1}", number, suffixes[counter]);
         }
     }
 }
