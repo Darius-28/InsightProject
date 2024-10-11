@@ -46,16 +46,19 @@ namespace SupportDesk.Application.Services
                 builder.TextBody += "Steps to Reproduce: No steps were provided.\n\n";
             }
 
-            if (ticket.AttachmentPaths != null && ticket.AttachmentPaths.Any())
+            if (ticket.AttachmentInfos != null && ticket.AttachmentInfos.Any())
             {
                 builder.TextBody += "Attachments:\n";
-                foreach (var attachmentPath in ticket.AttachmentPaths)
+                foreach (var attachment in ticket.AttachmentInfos)
                 {
-                    var fileName = Path.GetFileName(attachmentPath);
-                    var attachment = builder.Attachments.Add(attachmentPath);
-                    attachment.ContentId = GenerateContentId();
-                    var fileInfo = new FileInfo(attachmentPath);
-                    builder.TextBody += $"- {fileName} ({FormatFileSize(fileInfo.Length)})\n";
+                    builder.TextBody += $"- {attachment.FileName} ({FormatFileSize(attachment.FileSize)})\n";
+                    
+                    // Attach the file to the email
+                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads", attachment.FileName);
+                    if (File.Exists(filePath))
+                    {
+                        builder.Attachments.Add(filePath);
+                    }
                 }
             }
             else
@@ -80,11 +83,6 @@ namespace SupportDesk.Application.Services
                 Console.WriteLine($"Error sending email: {ex.Message}");
                 throw; // Re-throw the exception to be handled by the caller
             }
-        }
-
-        private string GenerateContentId()
-        {
-            return $"{Guid.NewGuid().ToString()}@supportdesk.com";
         }
 
         private string FormatFileSize(long bytes)

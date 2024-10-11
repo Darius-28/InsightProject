@@ -5,7 +5,9 @@
 /Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/bin/Debug/net8.0/SupportDesk.WebAPI.runtimeconfig.json
 /Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/bin/Debug/net8.0/SupportDesk.WebAPI.dll
 /Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/bin/Debug/net8.0/SupportDesk.WebAPI.pdb
+/Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/bin/Debug/net8.0/BouncyCastle.Cryptography.dll
 /Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/bin/Debug/net8.0/Humanizer.dll
+/Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/bin/Debug/net8.0/MailKit.dll
 /Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/bin/Debug/net8.0/Microsoft.AspNetCore.OpenApi.dll
 /Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/bin/Debug/net8.0/Microsoft.Bcl.AsyncInterfaces.dll
 /Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/bin/Debug/net8.0/Microsoft.CodeAnalysis.dll
@@ -28,6 +30,7 @@
 /Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/bin/Debug/net8.0/Microsoft.Extensions.Logging.Abstractions.dll
 /Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/bin/Debug/net8.0/Microsoft.Extensions.Options.dll
 /Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/bin/Debug/net8.0/Microsoft.OpenApi.dll
+/Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/bin/Debug/net8.0/MimeKit.dll
 /Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/bin/Debug/net8.0/Mono.TextTemplating.dll
 /Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/bin/Debug/net8.0/SQLitePCLRaw.batteries_v2.dll
 /Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/bin/Debug/net8.0/SQLitePCLRaw.core.dll
@@ -126,6 +129,7 @@
 /Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/obj/Debug/net8.0/SupportDesk.WebAPI.csproj.CoreCompileInputs.cache
 /Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/obj/Debug/net8.0/SupportDesk.WebAPI.MvcApplicationPartsAssemblyInfo.cs
 /Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/obj/Debug/net8.0/SupportDesk.WebAPI.MvcApplicationPartsAssemblyInfo.cache
+/Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/obj/Debug/net8.0/SupportDesk.WebAPI.sourcelink.json
 /Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/obj/Debug/net8.0/staticwebassets.build.json
 /Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/obj/Debug/net8.0/staticwebassets.development.json
 /Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/obj/Debug/net8.0/staticwebassets/msbuild.SupportDesk.WebAPI.Microsoft.AspNetCore.StaticWebAssets.props
@@ -140,7 +144,3 @@
 /Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/obj/Debug/net8.0/SupportDesk.WebAPI.pdb
 /Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/obj/Debug/net8.0/SupportDesk.WebAPI.genruntimeconfig.cache
 /Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/obj/Debug/net8.0/ref/SupportDesk.WebAPI.dll
-/Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/obj/Debug/net8.0/SupportDesk.WebAPI.sourcelink.json
-/Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/bin/Debug/net8.0/BouncyCastle.Cryptography.dll
-/Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/bin/Debug/net8.0/MailKit.dll
-/Users/darius_s/Documents/InsightProject/SupportDesk.WebAPI/bin/Debug/net8.0/MimeKit.dll

@@ -10,9 +10,9 @@
 /Users/darius_s/Documents/InsightProject/SupportDesk.Application/obj/Debug/net8.0/SupportDesk.Application.AssemblyInfoInputs.cache
 /Users/darius_s/Documents/InsightProject/SupportDesk.Application/obj/Debug/net8.0/SupportDesk.Application.AssemblyInfo.cs
 /Users/darius_s/Documents/InsightProject/SupportDesk.Application/obj/Debug/net8.0/SupportDesk.Application.csproj.CoreCompileInputs.cache
+/Users/darius_s/Documents/InsightProject/SupportDesk.Application/obj/Debug/net8.0/SupportDesk.Application.sourcelink.json
 /Users/darius_s/Documents/InsightProject/SupportDesk.Application/obj/Debug/net8.0/SupportD.F138F021.Up2Date
 /Users/darius_s/Documents/InsightProject/SupportDesk.Application/obj/Debug/net8.0/SupportDesk.Application.dll
 /Users/darius_s/Documents/InsightProject/SupportDesk.Application/obj/Debug/net8.0/refint/SupportDesk.Application.dll
 /Users/darius_s/Documents/InsightProject/SupportDesk.Application/obj/Debug/net8.0/SupportDesk.Application.pdb
 /Users/darius_s/Documents/InsightProject/SupportDesk.Application/obj/Debug/net8.0/ref/SupportDesk.Application.dll
-/Users/darius_s/Documents/InsightProject/SupportDesk.Application/obj/Debug/net8.0/SupportDesk.Application.sourcelink.json

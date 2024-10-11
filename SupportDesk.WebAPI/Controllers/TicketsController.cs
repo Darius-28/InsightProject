@@ -23,6 +23,11 @@ namespace SupportDesk.WebAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateTicket([FromForm] TicketDto ticketDto)
         {
+            if (Request.Form.Files.Any())
+            {
+                ticketDto.Attachments = Request.Form.Files.ToList();
+            }
+
             var createdTicket = await _ticketService.CreateTicketAsync(ticketDto);
             return CreatedAtAction(nameof(GetTicketById), new { id = createdTicket.Id }, createdTicket);
         }

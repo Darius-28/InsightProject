@@ -9,6 +9,7 @@ using SupportDesk.Core.Entities; // Assuming Ticket is defined here
 using SupportDesk.Infrastructure.Data; // Assuming SupportDeskDbContext is defined here
 using Microsoft.Extensions.Configuration;
 using System.IO;
+using Microsoft.AspNetCore.Http;
 
 namespace SupportDesk.Application.Services
 {
@@ -37,10 +38,8 @@ namespace SupportDesk.Application.Services
                 Email = ticketDto.Email,
                 CreatedAt = DateTime.UtcNow,
                 StepsToReproduce = ticketDto.StepsToReproduce,
-                AttachmentPaths = new List<string>()
+                Attachments = new List<Attachment>()
             };
-
-            ticketDto.AttachmentInfos = new List<AttachmentInfo>();
 
             if (ticketDto.Attachments != null && ticketDto.Attachments.Any())
             {
@@ -57,13 +56,15 @@ namespace SupportDesk.Application.Services
                         {
                             await file.CopyToAsync(stream);
                         }
-                        ticket.AttachmentPaths.Add(filePath);
-                        ticketDto.AttachmentPaths.Add(filePath);
-                        ticketDto.AttachmentInfos.Add(new AttachmentInfo 
-                        { 
-                            FileName = file.FileName, 
-                            FileSize = file.Length 
-                        });
+                        var attachment = new Attachment
+                        {
+                            Id = Guid.NewGuid(),
+                            FileName = file.FileName,
+                            FilePath = filePath,
+                            FileSize = file.Length,
+                            TicketId = ticket.Id
+                        };
+                        ticket.Attachments.Add(attachment);
                     }
                 }
             }
@@ -71,22 +72,14 @@ namespace SupportDesk.Application.Services
             _context.Tickets.Add(ticket);
             await _context.SaveChangesAsync();
             
-            ticketDto.Id = ticket.Id;
-
-            await _emailService.SendTicketCreationEmailAsync(ticketDto, _configuration["NotificationEmail"]);
-
-            // Clear the Attachments property as it's not needed in the response
-            ticketDto.Attachments = null;
-
-            return ticketDto;
+            var createdTicketDto = MapToDto(ticket);
+            await _emailService.SendTicketCreationEmailAsync(createdTicketDto, _configuration["NotificationEmail"]);
+            
+            return createdTicketDto;
         }
 
-        // Read
-        public async Task<TicketDto> GetTicketByIdAsync(Guid id) // Changed from int to Guid
+        private static TicketDto MapToDto(Ticket ticket)
         {
-            var ticket = await _context.Tickets.FindAsync(id);
-            if (ticket == null) return null;
-
             return new TicketDto
             {
                 Id = ticket.Id,
@@ -95,23 +88,29 @@ namespace SupportDesk.Application.Services
                 Priority = ticket.Priority,
                 Email = ticket.Email,
                 StepsToReproduce = ticket.StepsToReproduce,
-                AttachmentPaths = ticket.AttachmentPaths
+                AttachmentInfos = ticket.Attachments?.Select(a => new AttachmentDto
+                {
+                    FileName = a.FileName,
+                    FileSize = a.FileSize
+                }).ToList() ?? new List<AttachmentDto>()
             };
+        }
+
+        // Read
+        public async Task<TicketDto> GetTicketByIdAsync(Guid id) // Changed from int to Guid
+        {
+            var ticket = await _context.Tickets
+                .Include(t => t.Attachments)
+                .FirstOrDefaultAsync(t => t.Id == id);
+            
+            return ticket == null ? null : MapToDto(ticket);
         }
 
         public async Task<List<TicketDto>> GetAllTicketsAsync()
         {
             return await _context.Tickets
-                .Select(ticket => new TicketDto
-                {
-                    Id = ticket.Id,
-                    Title = ticket.Title,
-                    Description = ticket.Description,
-                    Priority = ticket.Priority,
-                    Email = ticket.Email,
-                    StepsToReproduce = ticket.StepsToReproduce,
-                    AttachmentPaths = ticket.AttachmentPaths
-                })
+                .Include(t => t.Attachments)
+                .Select(ticket => MapToDto(ticket))
                 .ToListAsync();
         }
 
@@ -125,6 +124,7 @@ namespace SupportDesk.Application.Services
             ticket.Description = ticketDto.Description;
             ticket.Priority = ticketDto.Priority;
             ticket.Email = ticketDto.Email;
+            ticket.StepsToReproduce = ticketDto.StepsToReproduce;
 
             _context.Tickets.Update(ticket);
             await _context.SaveChangesAsync();

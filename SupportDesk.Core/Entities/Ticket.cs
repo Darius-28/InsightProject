@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 
 namespace SupportDesk.Core.Entities
 {
     public class Ticket
     {
-        [Key]
         public Guid Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
@@ -14,6 +12,16 @@ namespace SupportDesk.Core.Entities
         public string Email { get; set; }
         public DateTime CreatedAt { get; set; }
         public string StepsToReproduce { get; set; }
-        public List<string> AttachmentPaths { get; set; } = new List<string>();
+        public List<Attachment> Attachments { get; set; } = new List<Attachment>();
+    }
+
+    public class Attachment
+    {
+        public Guid Id { get; set; }
+        public string FileName { get; set; }
+        public string FilePath { get; set; }
+        public long FileSize { get; set; }
+        public Guid TicketId { get; set; }
+        public Ticket Ticket { get; set; }
     }
 }
