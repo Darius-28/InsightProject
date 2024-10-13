@@ -1,7 +1,29 @@
-import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import { useForm, Controller, SubmitHandler } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+import {
+  TextField,
+  Button,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Typography,
+  makeStyles,
+  Theme,
+  GridList,
+  GridListTile,
+  GridListTileBar,
+  IconButton,
+  CircularProgress,
+} from '@material-ui/core';
+import { Delete as DeleteIcon } from '@material-ui/icons';
+import { DropzoneDialog } from 'material-ui-dropzone';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-interface Ticket {
+interface IFormInput {
   title: string;
   description: string;
   priority: string;
@@ -9,168 +31,296 @@ interface Ticket {
   stepsToReproduce: string;
 }
 
-interface AttachmentInfo {
+const schema = yup.object().shape({
+  title: yup.string().required('Title is required'),
+  description: yup.string().required('Description is required'),
+  priority: yup.string().required('Priority is required'),
+  email: yup.string().email('Invalid email').required('Email is required'),
+  stepsToReproduce: yup.string(),
+});
+
+interface FileWithPreview {
   file: File;
   preview: string;
 }
 
+const useStyles = makeStyles((theme: Theme) => ({
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing(2),
+  },
+  submitButton: {
+    position: 'relative',
+  },
+  buttonProgress: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginTop: -12,
+    marginLeft: -12,
+  },
+  filePreview: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+    overflow: 'hidden',
+    padding: theme.spacing(2, 0),
+    maxWidth: '100%',
+  },
+  gridList: {
+    width: '100%',
+    margin: 0,
+  },
+  gridListTile: {
+    width: '100% !important',
+    [theme.breakpoints.up('sm')]: {
+      width: '50% !important',
+    },
+    [theme.breakpoints.up('md')]: {
+      width: '33.33% !important',
+    },
+    [theme.breakpoints.up('lg')]: {
+      width: '25% !important',
+    },
+    padding: theme.spacing(1),
+  },
+  icon: {
+    color: 'rgba(255, 255, 255, 0.54)',
+  },
+  previewImg: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    borderRadius: theme.shape.borderRadius,
+  },
+  previewText: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%',
+    backgroundColor: theme.palette.grey[200],
+    borderRadius: theme.shape.borderRadius,
+    padding: theme.spacing(2),
+  },
+  tileBar: {
+    background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
+  },
+}));
+
 const TicketForm: React.FC = () => {
-  const [ticket, setTicket] = useState<Ticket>({
-    title: '',
-    description: '',
-    priority: 'Low',
-    email: '',
-    stepsToReproduce: '',
+  const classes = useStyles();
+  const { control, handleSubmit, formState: { errors }, setValue } = useForm<IFormInput>({
+    resolver: yupResolver(schema)
   });
-  const [attachments, setAttachments] = useState<AttachmentInfo[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setTicket(prevTicket => ({
-      ...prevTicket,
-      [name]: value,
-    }));
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newAttachments = Array.from(e.target.files).map(file => ({
-        file,
-        preview: URL.createObjectURL(file)
-      }));
-      setAttachments(prevAttachments => [...prevAttachments, ...newAttachments]);
-    }
-  };
-
-  const removeAttachment = (index: number) => {
-    setAttachments(prevAttachments => prevAttachments.filter((_, i) => i !== index));
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
-    try {
-      const formData = new FormData();
-      Object.entries(ticket).forEach(([key, value]) => {
-        formData.append(key, value);
-      });
-      attachments.forEach((attachment, index) => {
-        formData.append(`attachments`, attachment.file);
-      });
-
-      const response = await axios.post('http://localhost:5000/api/tickets', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      console.log('Ticket created:', response.data);
-      alert('Ticket created successfully!');
-      setTicket({ title: '', description: '', priority: 'Low', email: '', stepsToReproduce: '' });
-      setAttachments([]);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''; // Clear the file input
-      }
-    } catch (error) {
-      console.error('Error creating ticket:', error);
-      alert('Error creating ticket. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [files, setFiles] = useState<FileWithPreview[]>([]);
+  const [openDropzone, setOpenDropzone] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Cleanup function to revoke object URLs
     return () => {
-      attachments.forEach(attachment => URL.revokeObjectURL(attachment.preview));
+      files.forEach(file => URL.revokeObjectURL(file.preview));
     };
-  }, [attachments]);
+  }, []);
+
+  const onSubmit: SubmitHandler<IFormInput> = async (data) => {
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('title', data.title);
+      formData.append('description', data.description);
+      formData.append('priority', data.priority);
+      formData.append('email', data.email);
+      formData.append('stepsToReproduce', data.stepsToReproduce);
+
+      files.forEach((fileWithPreview, index) => {
+        formData.append(`attachments`, fileWithPreview.file);
+      });
+
+      const response = await fetch('http://localhost:5000/api/tickets', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit ticket');
+      }
+
+      const result = await response.json();
+      console.log(result);
+      toast.success('Ticket submitted successfully!');
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error('Error submitting ticket. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveFiles = (newFiles: File[]) => {
+    const newFilesWithPreview = newFiles.map(file => ({
+      file,
+      preview: URL.createObjectURL(file)
+    }));
+    setFiles(prevFiles => [...prevFiles, ...newFilesWithPreview]);
+    setOpenDropzone(false);
+  };
+
+  const handleDeleteFile = (index: number) => {
+    setFiles(prevFiles => {
+      const newFiles = [...prevFiles];
+      URL.revokeObjectURL(newFiles[index].preview);
+      newFiles.splice(index, 1);
+      return newFiles;
+    });
+  };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="title">Title:</label>
-        <input
-          type="text"
-          id="title"
+    <>
+      <form onSubmit={handleSubmit(onSubmit)} className={classes.form}>
+        <Controller
           name="title"
-          value={ticket.title}
-          onChange={handleChange}
-          required
+          control={control}
+          defaultValue=""
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label="Title"
+              error={!!errors.title}
+              helperText={errors.title?.message}
+              fullWidth
+            />
+          )}
         />
-      </div>
-      <div>
-        <label htmlFor="description">Description:</label>
-        <textarea
-          id="description"
+
+        <Controller
           name="description"
-          value={ticket.description}
-          onChange={handleChange}
-          required
+          control={control}
+          defaultValue=""
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label="Description"
+              multiline
+              minRows={4}
+              error={!!errors.description}
+              helperText={errors.description?.message}
+              fullWidth
+            />
+          )}
         />
-      </div>
-      <div>
-        <label htmlFor="priority">Priority:</label>
-        <select
-          id="priority"
+
+        <Controller
           name="priority"
-          value={ticket.priority}
-          onChange={handleChange}
-        >
-          <option value="Low">Low</option>
-          <option value="Medium">Medium</option>
-          <option value="High">High</option>
-          <option value="Critical">Critical</option>
-        </select>
-      </div>
-      <div>
-        <label htmlFor="email">Email:</label>
-        <input
-          type="email"
-          id="email"
+          control={control}
+          defaultValue=""
+          render={({ field }) => (
+            <FormControl fullWidth error={!!errors.priority}>
+              <InputLabel>Priority</InputLabel>
+              <Select {...field}>
+                <MenuItem value="Low">Low</MenuItem>
+                <MenuItem value="Medium">Medium</MenuItem>
+                <MenuItem value="High">High</MenuItem>
+                <MenuItem value="Critical">Critical</MenuItem>
+              </Select>
+              {errors.priority && <Typography color="error">{errors.priority.message}</Typography>}
+            </FormControl>
+          )}
+        />
+
+        <Controller
           name="email"
-          value={ticket.email}
-          onChange={handleChange}
-          required
+          control={control}
+          defaultValue=""
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label="Email"
+              type="email"
+              error={!!errors.email}
+              helperText={errors.email?.message}
+              fullWidth
+            />
+          )}
         />
-      </div>
-      <div>
-        <label htmlFor="stepsToReproduce">Steps to Reproduce:</label>
-        <textarea
-          id="stepsToReproduce"
+
+        <Controller
           name="stepsToReproduce"
-          value={ticket.stepsToReproduce}
-          onChange={handleChange}
+          control={control}
+          defaultValue=""
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label="Steps to Reproduce"
+              multiline
+              minRows={4}
+              error={!!errors.stepsToReproduce}
+              helperText={errors.stepsToReproduce?.message}
+              fullWidth
+            />
+          )}
         />
-      </div>
-      <div>
-        <label htmlFor="attachments">Attachments:</label>
-        <input
-          type="file"
-          id="attachments"
-          name="attachments"
-          onChange={handleFileChange}
-          multiple
-          ref={fileInputRef}
+
+        <Button
+          variant="contained"
+          color="default"
+          onClick={() => setOpenDropzone(true)}
+        >
+          Attach Files
+        </Button>
+
+        {files.length > 0 && (
+          <div className={classes.filePreview}>
+            <GridList cellHeight={180} className={classes.gridList} cols={1} spacing={0}>
+              {files.map((fileWithPreview, index) => (
+                <GridListTile key={index} className={classes.gridListTile}>
+                  {fileWithPreview.file.type.startsWith('image/') ? (
+                    <img src={fileWithPreview.preview} alt={fileWithPreview.file.name} className={classes.previewImg} />
+                  ) : (
+                    <div className={classes.previewText}>
+                      <Typography variant="body1">{fileWithPreview.file.name}</Typography>
+                    </div>
+                  )}
+                  <GridListTileBar
+                    title={fileWithPreview.file.name}
+                    actionIcon={
+                      <IconButton
+                        className={classes.icon}
+                        onClick={() => handleDeleteFile(index)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    }
+                    className={classes.tileBar}
+                  />
+                </GridListTile>
+              ))}
+            </GridList>
+          </div>
+        )}
+
+        <DropzoneDialog
+          open={openDropzone}
+          onSave={handleSaveFiles}
+          acceptedFiles={['image/*', '.pdf']}
+          showPreviews={true}
+          maxFileSize={5000000}
+          onClose={() => setOpenDropzone(false)}
         />
-      </div>
-      {attachments.length > 0 && (
-        <div>
-          <h4>Selected Attachments:</h4>
-          <ul>
-            {attachments.map((attachment, index) => (
-              <li key={index}>
-                {attachment.file.name} ({(attachment.file.size / 1024).toFixed(2)} KB)
-                <button type="button" onClick={() => removeAttachment(index)}>Remove</button>
-                <img src={attachment.preview} alt="Preview" style={{maxWidth: '100px', maxHeight: '100px'}} />
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-      <button type="submit" disabled={isLoading}>
-        {isLoading ? 'Creating...' : 'Create Ticket'}
-      </button>
-    </form>
+
+        <Button 
+          type="submit" 
+          variant="contained" 
+          color="primary"
+          disabled={loading}
+          className={classes.submitButton}
+        >
+          Submit
+          {loading && <CircularProgress size={24} className={classes.buttonProgress} />}
+        </Button>
+      </form>
+      <ToastContainer />
+    </>
   );
 };
 

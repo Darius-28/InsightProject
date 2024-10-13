@@ -81,3 +81,7 @@ button:disabled {
   color: #666666;
   cursor: not-allowed;
 }
+
+form div {
+  margin-bottom: 0px;
+}

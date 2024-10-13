@@ -23,13 +23,21 @@ namespace SupportDesk.WebAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateTicket([FromForm] TicketDto ticketDto)
         {
-            if (Request.Form.Files.Any())
+            try
             {
-                ticketDto.Attachments = Request.Form.Files.ToList();
-            }
+                if (Request.Form.Files.Any())
+                {
+                    ticketDto.Attachments = Request.Form.Files.ToList();
+                }
 
-            var createdTicket = await _ticketService.CreateTicketAsync(ticketDto);
-            return CreatedAtAction(nameof(GetTicketById), new { id = createdTicket.Id }, createdTicket);
+                var createdTicket = await _ticketService.CreateTicketAsync(ticketDto);
+                return CreatedAtAction(nameof(GetTicketById), new { id = createdTicket.Id }, createdTicket);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in CreateTicket: {ex.Message}");
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
         [HttpGet("{id}")]

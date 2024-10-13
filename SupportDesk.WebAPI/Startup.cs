@@ -49,8 +49,6 @@ namespace SupportDesk.WebAPI
 
             app.UseRouting();
 
-            // Other middleware...
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

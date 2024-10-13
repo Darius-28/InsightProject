@@ -59,6 +59,10 @@ namespace SupportDesk.Application.Services
                     {
                         builder.Attachments.Add(filePath);
                     }
+                    else
+                    {
+                        Console.WriteLine($"File not found: {filePath}");
+                    }
                 }
             }
             else

@@ -29,53 +29,61 @@ namespace SupportDesk.Application.Services
         // Create
         public async Task<TicketDto> CreateTicketAsync(TicketDto ticketDto)
         {
-            var ticket = new Ticket
+            try
             {
-                Id = Guid.NewGuid(),
-                Title = ticketDto.Title,
-                Description = ticketDto.Description,
-                Priority = ticketDto.Priority,
-                Email = ticketDto.Email,
-                CreatedAt = DateTime.UtcNow,
-                StepsToReproduce = ticketDto.StepsToReproduce,
-                Attachments = new List<Attachment>()
-            };
-
-            if (ticketDto.Attachments != null && ticketDto.Attachments.Any())
-            {
-                var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
-                Directory.CreateDirectory(uploadPath);
-
-                foreach (var file in ticketDto.Attachments)
+                var ticket = new Ticket
                 {
-                    if (file.Length > 0)
+                    Id = Guid.NewGuid(),
+                    Title = ticketDto.Title,
+                    Description = ticketDto.Description,
+                    Priority = ticketDto.Priority,
+                    Email = ticketDto.Email,
+                    CreatedAt = DateTime.UtcNow,
+                    StepsToReproduce = ticketDto.StepsToReproduce,
+                    Attachments = new List<Attachment>()
+                };
+
+                if (ticketDto.Attachments != null && ticketDto.Attachments.Any())
+                {
+                    var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+                    Directory.CreateDirectory(uploadPath);
+
+                    foreach (var file in ticketDto.Attachments)
                     {
-                        var fileName = Path.GetRandomFileName() + Path.GetExtension(file.FileName);
-                        var filePath = Path.Combine(uploadPath, fileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        if (file.Length > 0)
                         {
-                            await file.CopyToAsync(stream);
+                            var fileName = file.FileName; // Use the original file name
+                            var filePath = Path.Combine(uploadPath, fileName);
+                            using (var stream = new FileStream(filePath, FileMode.Create))
+                            {
+                                await file.CopyToAsync(stream);
+                            }
+                            var attachment = new Attachment
+                            {
+                                Id = Guid.NewGuid(),
+                                FileName = fileName,
+                                FilePath = filePath,
+                                FileSize = file.Length,
+                                TicketId = ticket.Id
+                            };
+                            ticket.Attachments.Add(attachment);
                         }
-                        var attachment = new Attachment
-                        {
-                            Id = Guid.NewGuid(),
-                            FileName = file.FileName,
-                            FilePath = filePath,
-                            FileSize = file.Length,
-                            TicketId = ticket.Id
-                        };
-                        ticket.Attachments.Add(attachment);
                     }
                 }
-            }
 
-            _context.Tickets.Add(ticket);
-            await _context.SaveChangesAsync();
-            
-            var createdTicketDto = MapToDto(ticket);
-            await _emailService.SendTicketCreationEmailAsync(createdTicketDto, _configuration["NotificationEmail"]);
-            
-            return createdTicketDto;
+                _context.Tickets.Add(ticket);
+                await _context.SaveChangesAsync();
+                
+                var createdTicketDto = MapToDto(ticket);
+                await _emailService.SendTicketCreationEmailAsync(createdTicketDto, _configuration["NotificationEmail"]);
+                
+                return createdTicketDto;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error creating ticket: {ex.Message}");
+                throw; // Re-throw the exception to be handled by the controller
+            }
         }
 
         private static TicketDto MapToDto(Ticket ticket)
