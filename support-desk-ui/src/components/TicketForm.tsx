@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -17,7 +17,7 @@ import {
   IconButton,
   CircularProgress,
 } from '@material-ui/core';
-import { GridList, GridListTile, GridListTileBar } from '@material-ui/core'; // These might be renamed in newer versions
+import { GridList, GridListTile, GridListTileBar } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -30,6 +30,8 @@ interface IFormInput {
   email: string;
   stepsToReproduce: string;
 }
+
+type AISuggestionField = 'title' | 'priority' | 'stepsToReproduce';
 
 const schema = yup.object().shape({
   title: yup.string().required('Title is required'),
@@ -173,28 +175,138 @@ const useStyles = makeStyles((theme: Theme) => ({
   menuItem: {
     fontSize: '1rem', // Increased menu item font size
   },
+  aiSuggestion: {
+    display: 'flex',
+    alignItems: 'center',
+    marginBottom: theme.spacing(1),
+  },
+  aiButton: {
+    marginRight: theme.spacing(1),
+  },
+  aiAssistButton: {
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.primary.contrastText,
+    '&:hover': {
+      backgroundColor: theme.palette.primary.dark,
+    },
+  },
+  revertButton: {
+    backgroundColor: theme.palette.error.main,
+    color: theme.palette.error.contrastText,
+    '&:hover': {
+      backgroundColor: theme.palette.error.dark,
+    },
+  },
 }));
 
 const TicketForm: React.FC = () => {
   const classes = useStyles();
-  const { control, handleSubmit, formState: { errors }, reset } = useForm<IFormInput>({
-    resolver: yupResolver(schema),
-    mode: 'onBlur',
-  });
   const [files, setFiles] = useState<FileWithPreview[]>([]);
   const [openDropzone, setOpenDropzone] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<Record<AISuggestionField, string>>({
+    title: '',
+    priority: '',
+    stepsToReproduce: '',
+  });
+  const [aiFeedback, setAiFeedback] = useState<Record<AISuggestionField, boolean | null>>({
+    title: null,
+    priority: null,
+    stepsToReproduce: null,
+  });
+  const [suggestionsMade, setSuggestionsMade] = useState(false);
+  const [originalInputs, setOriginalInputs] = useState<Partial<IFormInput>>({});
+  const [fieldStates, setFieldStates] = useState<Record<AISuggestionField, 'original' | 'ai'>>({
+    title: 'original',
+    priority: 'original',
+    stepsToReproduce: 'original',
+  });
+  const [descriptionLength, setDescriptionLength] = useState(0);
+  const suggestionsRequestedRef = useRef(false);
+
+  const { control, handleSubmit, formState: { errors }, reset, setValue, watch } = useForm<IFormInput>({
+    resolver: yupResolver(schema),
+    mode: 'onBlur',
+    defaultValues: {
+      description: '',
+    },
+  });
+
+  // Watch the description field
+  const description = watch('description');
+
+  const requestAiSuggestions = useCallback(async () => {
+    if (suggestionsMade || suggestionsRequestedRef.current) return;
+
+    suggestionsRequestedRef.current = true;
+
+    // TODO: Implement API call to get AI suggestions
+    // For now, we'll use mock data
+    const mockSuggestions: Record<AISuggestionField, string> = {
+      title: 'AI Suggested Title',
+      priority: 'High',
+      stepsToReproduce: '1. Step one\n2. Step two\n3. Step three',
+    };
+    
+    setAiSuggestions(mockSuggestions);
+    setSuggestionsMade(true);
+    
+    toast.info(`AI suggestions are ready. Click 'AI Assist' to apply them.`);
+  }, [suggestionsMade]);
 
   useEffect(() => {
-    return () => {
-      files.forEach(file => URL.revokeObjectURL(file.preview));
-    };
-  }, [files]);
+    const length = description?.length ?? 0;
+    setDescriptionLength(length);
+    if (length > 10 && !suggestionsMade && !suggestionsRequestedRef.current) {
+      requestAiSuggestions();
+    } else if (length === 0) {
+      setSuggestionsMade(false);
+      suggestionsRequestedRef.current = false;
+      setFieldStates({
+        title: 'original',
+        priority: 'original',
+        stepsToReproduce: 'original',
+      });
+    }
+  }, [description, requestAiSuggestions, suggestionsMade]);
 
-  const validateEmail = (email: string) => {
-    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(String(email).toLowerCase());
+  const toggleAiSuggestion = (field: AISuggestionField) => {
+    if (descriptionLength === 0) return; // Prevent toggling if description is empty
+
+    if (fieldStates[field] === 'original') {
+      setValue(field as keyof IFormInput, aiSuggestions[field]);
+      setFieldStates(prev => ({ ...prev, [field]: 'ai' }));
+      toast.info(`AI suggestion applied for ${field}`);
+    } else {
+      const originalValue = originalInputs[field as keyof IFormInput] || '';
+      setValue(field as keyof IFormInput, originalValue);
+      setFieldStates(prev => ({ ...prev, [field]: 'original' }));
+      toast.info(`Reverted to original input for ${field}`);
+    }
   };
+
+  const provideFeedback = useCallback((field: AISuggestionField, isHelpful: boolean) => {
+    setAiFeedback(prev => ({ ...prev, [field]: isHelpful }));
+    
+    if (!isHelpful) {
+      // If feedback is negative (thumbs down), revert to original input
+      const originalValue = originalInputs[field as keyof IFormInput] || '';
+      setValue(field as keyof IFormInput, originalValue);
+      setAiSuggestions(prev => ({ ...prev, [field]: '' }));
+      toast.info(`AI suggestion for ${field} has been removed. Reverted to your original input.`);
+    } else {
+      toast.success(`Thank you for your feedback on the ${field} suggestion`);
+    }
+    
+    // TODO: Send feedback to AI service
+  }, [setValue, originalInputs]);
+
+  useEffect(() => {
+    const description = watch('description');
+    if (description.length > 10 && !suggestionsMade) {
+      requestAiSuggestions();
+    }
+  }, [watch('description'), requestAiSuggestions, suggestionsMade]);
 
   const onSubmit: SubmitHandler<IFormInput> = async (data) => {
     if (!validateEmail(data.email)) {
@@ -205,14 +317,19 @@ const TicketForm: React.FC = () => {
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append('title', data.title);
-      formData.append('description', data.description);
-      formData.append('priority', data.priority);
-      formData.append('email', data.email);
-      formData.append('stepsToReproduce', data.stepsToReproduce);
-
+      Object.entries(data).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
       files.forEach((fileWithPreview, index) => {
         formData.append(`attachments`, fileWithPreview.file);
+      });
+      Object.entries(aiSuggestions).forEach(([key, value]) => {
+        formData.append(`aiSuggestion_${key}`, value);
+      });
+      Object.entries(aiFeedback).forEach(([key, value]) => {
+        if (value !== null) {
+          formData.append(`aiFeedback_${key}`, value.toString());
+        }
       });
 
       const response = await fetch('http://localhost:5000/api/tickets', {
@@ -228,14 +345,7 @@ const TicketForm: React.FC = () => {
       console.log(result);
       toast.success('Ticket submitted successfully!');
       
-      reset({
-        title: '',
-        description: '',
-        priority: '',
-        email: '',
-        stepsToReproduce: ''
-      });
-      
+      reset();
       setFiles([]);
       
     } catch (error) {
@@ -264,6 +374,11 @@ const TicketForm: React.FC = () => {
     });
   };
 
+  const validateEmail = (email: string) => {
+    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+  };
+
   return (
     <div className={classes.formContainer}>
       <form onSubmit={handleSubmit(onSubmit)} className={classes.form}>
@@ -274,16 +389,26 @@ const TicketForm: React.FC = () => {
               control={control}
               defaultValue=""
               render={({ field, fieldState: { error } }) => (
-                <TextField
-                  {...field}
-                  label="Title"
-                  variant="filled"
-                  fullWidth
-                  placeholder='Please provide a concise title for your issue.'
-                  error={!!error}
-                  helperText={error?.message}
-                  className={classes.textField}
-                />
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <TextField
+                    {...field}
+                    label="Title"
+                    variant="filled"
+                    fullWidth
+                    placeholder='Please provide a concise title for your issue.'
+                    error={!!error}
+                    helperText={error?.message}
+                    className={classes.textField}
+                  />
+                  <Button
+                    onClick={() => toggleAiSuggestion('title')}
+                    disabled={!suggestionsMade || descriptionLength === 0}
+                    style={{ marginLeft: '10px', minWidth: '100px' }}
+                    className={fieldStates.title === 'original' ? classes.aiAssistButton : classes.revertButton}
+                  >
+                    {fieldStates.title === 'original' ? 'AI Assist' : 'Revert'}
+                  </Button>
+                </div>
               )}
             />
           </Grid>
@@ -305,6 +430,10 @@ const TicketForm: React.FC = () => {
                   error={!!error}
                   helperText={error?.message}
                   className={classes.textField}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    setDescriptionLength(e.target.value.length);
+                  }}
                 />
               )}
             />
@@ -316,20 +445,30 @@ const TicketForm: React.FC = () => {
               control={control}
               defaultValue=""
               render={({ field, fieldState: { error } }) => (
-                <FormControl variant="filled" className={classes.formControl} error={!!error} fullWidth>
-                  <InputLabel id="priority-label">Priority</InputLabel>
-                  <Select
-                    {...field}
-                    labelId="priority-label"
-                    id="priority"
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <FormControl variant="filled" className={classes.formControl} error={!!error} fullWidth>
+                    <InputLabel id="priority-label">Priority</InputLabel>
+                    <Select
+                      {...field}
+                      labelId="priority-label"
+                      id="priority"
+                    >
+                      <MenuItem value="Low">Low</MenuItem>
+                      <MenuItem value="Medium">Medium</MenuItem>
+                      <MenuItem value="High">High</MenuItem>
+                      <MenuItem value="Critical">Critical</MenuItem>
+                    </Select>
+                    <FormHelperText>{error?.message}</FormHelperText>
+                  </FormControl>
+                  <Button
+                    onClick={() => toggleAiSuggestion('priority')}
+                    disabled={!suggestionsMade || descriptionLength === 0}
+                    style={{ marginLeft: '10px', minWidth: '100px' }}
+                    className={fieldStates.priority === 'original' ? classes.aiAssistButton : classes.revertButton}
                   >
-                    <MenuItem value="Low">Low</MenuItem>
-                    <MenuItem value="Medium">Medium</MenuItem>
-                    <MenuItem value="High">High</MenuItem>
-                    <MenuItem value="Critical">Critical</MenuItem>
-                  </Select>
-                  <FormHelperText>{error?.message}</FormHelperText>
-                </FormControl>
+                    {fieldStates.priority === 'original' ? 'AI Assist' : 'Revert'}
+                  </Button>
+                </div>
               )}
             />
           </Grid>
@@ -361,18 +500,28 @@ const TicketForm: React.FC = () => {
               control={control}
               defaultValue=""
               render={({ field, fieldState: { error } }) => (
-                <TextField
-                  {...field}
-                  label="Steps to Reproduce"
-                  multiline
-                  minRows={4}
-                  variant="filled"
-                  fullWidth
-                  placeholder='If applicable, please provide steps to reproduce the issue.'
-                  error={!!error}
-                  helperText={error?.message}
-                  className={classes.textField}
-                />
+                <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+                  <TextField
+                    {...field}
+                    label="Steps to Reproduce"
+                    multiline
+                    minRows={4}
+                    variant="filled"
+                    fullWidth
+                    placeholder='If applicable, please provide steps to reproduce the issue.'
+                    error={!!error}
+                    helperText={error?.message}
+                    className={classes.textField}
+                  />
+                  <Button
+                    onClick={() => toggleAiSuggestion('stepsToReproduce')}
+                    disabled={!suggestionsMade || descriptionLength === 0}
+                    style={{ marginLeft: '10px', minWidth: '100px' }}
+                    className={fieldStates.stepsToReproduce === 'original' ? classes.aiAssistButton : classes.revertButton}
+                  >
+                    {fieldStates.stepsToReproduce === 'original' ? 'AI Assist' : 'Revert'}
+                  </Button>
+                </div>
               )}
             />
           </Grid>
