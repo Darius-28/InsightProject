@@ -14,10 +14,12 @@ namespace SupportDesk.WebAPI.Controllers
     public class TicketsController : ControllerBase
     {
         private readonly ITicketService _ticketService;
+        private readonly IAIService _aiService;
 
-        public TicketsController(ITicketService ticketService)
+        public TicketsController(ITicketService ticketService, IAIService aiService)
         {
             _ticketService = ticketService;
+            _aiService = aiService;
         }
 
         [HttpPost]
@@ -36,6 +38,29 @@ namespace SupportDesk.WebAPI.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in CreateTicket: {ex.Message}");
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
+
+        [HttpPost("ai/suggestions")]
+        public async Task<IActionResult> GetAISuggestions([FromBody] AISuggestionRequest request)
+        {
+            try
+            {
+                var titleSuggestion = await _aiService.GenerateTitleAsync(request.Description);
+                var prioritySuggestion = await _aiService.GeneratePriorityAsync(request.Description);
+                var stepsSuggestion = await _aiService.GenerateStepsToReproduceAsync(request.Description);
+
+                return Ok(new
+                {
+                    title = titleSuggestion,
+                    priority = prioritySuggestion,
+                    stepsToReproduce = stepsSuggestion
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting AI suggestions: {ex.Message}");
                 return StatusCode(500, "An error occurred while processing your request.");
             }
         }
@@ -69,5 +94,10 @@ namespace SupportDesk.WebAPI.Controllers
             await _ticketService.DeleteTicketAsync(id);
             return NoContent();
         }
+    }
+
+    public class AISuggestionRequest
+    {
+        public string Description { get; set; }
     }
 }

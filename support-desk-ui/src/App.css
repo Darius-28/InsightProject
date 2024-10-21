@@ -1,8 +1,13 @@
 .App {
   text-align: center;
-  max-width: 600px;
   margin: 0 auto;
   padding: 20px;
+}
+
+element.style {
+  margin-top: 64px;
+  padding: 20px;
+  max-width: 600px;
 }
 
 .App-logo {
@@ -45,6 +50,7 @@ form {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  width: 100%;
 }
 
 form div {
@@ -85,3 +91,4 @@ button:disabled {
 form div {
   margin-bottom: 0px;
 }
+

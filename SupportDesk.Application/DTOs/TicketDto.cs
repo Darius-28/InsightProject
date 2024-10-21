@@ -13,6 +13,9 @@ namespace SupportDesk.Application.DTOs
         public string Priority { get; set; }
         public string Email { get; set; }
         public string StepsToReproduce { get; set; }
+        public string AISuggestedTitle { get; set; }
+        public string AISuggestedPriority { get; set; }
+        public string AISuggestedSteps { get; set; }
         
         [JsonIgnore] // This will exclude the property from JSON serialization
         public List<IFormFile> Attachments { get; set; }
@@ -27,5 +30,6 @@ namespace SupportDesk.Application.DTOs
         public long FileSize { get; set; }
     }
 }
+
 
 

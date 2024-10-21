@@ -55,5 +55,6 @@
   },
   "devDependencies": {
     "@types/react-toastify": "^4.0.2"
-  }
+  },
+  "proxy": "http://localhost:5000"
 }

@@ -26,15 +26,15 @@ namespace SupportDesk.WebAPI
             services.AddDbContext<SupportDeskDbContext>(options =>
                 options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
             services.AddScoped<IEmailService, EmailService>();
+            services.AddHttpClient<IAIService, AIService>();
 
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowReactApp",
                     builder => builder
-                        .WithOrigins("http://localhost:3000")
+                        .WithOrigins("http://localhost:3000") // Your React app's URL
                         .AllowAnyMethod()
-                        .AllowAnyHeader()
-                        .AllowCredentials());
+                        .AllowAnyHeader());
             });
         }
 

@@ -18,12 +18,14 @@ namespace SupportDesk.Application.Services
         private readonly SupportDeskDbContext _context;
         private readonly IEmailService _emailService;
         private readonly IConfiguration _configuration;
+        private readonly IAIService _aiService;
 
-        public TicketService(SupportDeskDbContext context, IEmailService emailService, IConfiguration configuration)
+        public TicketService(SupportDeskDbContext context, IEmailService emailService, IConfiguration configuration, IAIService aiService)
         {
             _context = context;
             _emailService = emailService;
             _configuration = configuration;
+            _aiService = aiService;
         }
 
         // Create
@@ -31,6 +33,11 @@ namespace SupportDesk.Application.Services
         {
             try
             {
+                // Generate AI suggestions
+                var suggestedTitle = await _aiService.GenerateTitleAsync(ticketDto.Description);
+                var suggestedPriority = await _aiService.GeneratePriorityAsync(ticketDto.Description);
+                var suggestedSteps = await _aiService.GenerateStepsToReproduceAsync(ticketDto.Description);
+
                 var ticket = new Ticket
                 {
                     Id = Guid.NewGuid(),
@@ -40,7 +47,10 @@ namespace SupportDesk.Application.Services
                     Email = ticketDto.Email,
                     CreatedAt = DateTime.UtcNow,
                     StepsToReproduce = ticketDto.StepsToReproduce,
-                    Attachments = new List<Attachment>()
+                    Attachments = new List<Attachment>(),
+                    AISuggestedTitle = suggestedTitle,
+                    AISuggestedPriority = suggestedPriority,
+                    AISuggestedSteps = suggestedSteps
                 };
 
                 if (ticketDto.Attachments != null && ticketDto.Attachments.Any())
@@ -116,10 +126,17 @@ namespace SupportDesk.Application.Services
 
         public async Task<List<TicketDto>> GetAllTicketsAsync()
         {
-            return await _context.Tickets
-                .Include(t => t.Attachments)
-                .Select(ticket => MapToDto(ticket))
+            var tickets = await _context.Tickets
+                .Select(t => new TicketDto
+                {
+                    // ... other properties
+                    AISuggestedTitle = t.AISuggestedTitle,
+                    AISuggestedPriority = t.AISuggestedPriority,
+                    AISuggestedSteps = t.AISuggestedSteps
+                })
                 .ToListAsync();
+
+            return tickets;
         }
 
         // Update

@@ -19,12 +19,12 @@ const useStyles = makeStyles((theme: Theme) => ({
     position: 'relative',
     left: 0,
     right: 0,
-    top: (theme.mixins.toolbar.minHeight as number) + 175,
+    top: (theme.mixins.toolbar.minHeight as number) + 17,
     zIndex: theme.zIndex.drawer - 1,
     marginBottom: -40,
   },
   subAppBar: {
-    width: '300%',
+    width: '90%',
     maxWidth: '1800px',
     height: '50px',
     backgroundColor: theme.palette.primary.main,
@@ -47,8 +47,8 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   headingContainer: {
     position: 'relative',
-    top: (theme.mixins.toolbar.minHeight as number) + 175 + 70,
-    right: theme.spacing(60),
+    top: (theme.mixins.toolbar.minHeight as number) + 0 + 70,
+    right: theme.spacing(-8),
     zIndex: theme.zIndex.drawer - 2,
     display: 'flex',
     flexDirection: 'column',
@@ -62,10 +62,12 @@ const useStyles = makeStyles((theme: Theme) => ({
     marginBottom: theme.spacing(1), 
   },
   underline: {
-    width: '270%',
+    width: '93%',
     height: '2px',
     backgroundColor: theme.palette.primary.main,
   },
+
+  
 }));
 
 const SubAppBar: React.FC = () => {

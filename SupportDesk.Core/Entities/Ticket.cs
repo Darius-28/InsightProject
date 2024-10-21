@@ -13,6 +13,9 @@ namespace SupportDesk.Core.Entities
         public DateTime CreatedAt { get; set; }
         public string StepsToReproduce { get; set; }
         public List<Attachment> Attachments { get; set; } = new List<Attachment>();
+        public string AISuggestedTitle { get; set; }
+        public string AISuggestedPriority { get; set; }
+        public string AISuggestedSteps { get; set; }
     }
 
     public class Attachment
