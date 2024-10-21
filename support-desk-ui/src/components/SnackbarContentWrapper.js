@@ -8,7 +8,6 @@ import InfoIcon from '@mui/icons-material/Info';
 import WarningIcon from '@mui/icons-material/Warning';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
-import * as React from 'react';
 
 const variantIcon = {
     success: CheckCircleIcon,

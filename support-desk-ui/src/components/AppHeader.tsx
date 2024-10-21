@@ -21,10 +21,6 @@ import SubAppBar from './SubAppBar';
 const drawerWidth = 80;
 
 const useStyles = makeStyles((theme: Theme) => {
-  const toolbarHeight = theme.mixins.toolbar.minHeight as number || 56; // Default to 56px if undefined
-  const subAppBarHeight = 40;
-  const subAppBarSpacing = 16; // Match the top spacing from SubAppBar
-  const totalHeaderHeight = toolbarHeight + subAppBarHeight + subAppBarSpacing;
 
   return {
     root: {

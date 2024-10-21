@@ -1,11 +1,6 @@
-using System;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using SupportDesk.Application.DTOs;
 using SupportDesk.Application.Interfaces;
-using Microsoft.AspNetCore.Http;
-using System.IO;
-using System.Linq;
 
 namespace SupportDesk.WebAPI.Controllers
 {
@@ -27,12 +22,34 @@ namespace SupportDesk.WebAPI.Controllers
         {
             try
             {
+                // Ensure all required fields are present
+                if (string.IsNullOrWhiteSpace(ticketDto.Title) ||
+                    string.IsNullOrWhiteSpace(ticketDto.Description) ||
+                    string.IsNullOrWhiteSpace(ticketDto.Priority) ||
+                    string.IsNullOrWhiteSpace(ticketDto.Email) ||
+                    string.IsNullOrWhiteSpace(ticketDto.StepsToReproduce))
+                {
+                    return BadRequest("All fields are required.");
+                }
+
                 if (Request.Form.Files.Any())
                 {
                     ticketDto.Attachments = Request.Form.Files.ToList();
                 }
 
+                // Explicitly set AI-suggested fields from form data
+                ticketDto.AISuggestedTitle = Request.Form["aiSuggestedTitle"];
+                ticketDto.AISuggestedPriority = Request.Form["aiSuggestedPriority"];
+                ticketDto.AISuggestedSteps = Request.Form["aiSuggestedSteps"];
+
+                // Log the received data
+                Console.WriteLine($"Received TicketDto: Title={ticketDto.Title}, Description={ticketDto.Description}, Priority={ticketDto.Priority}, Email={ticketDto.Email}, StepsToReproduce={ticketDto.StepsToReproduce}, AISuggestedTitle={ticketDto.AISuggestedTitle}, AISuggestedPriority={ticketDto.AISuggestedPriority}, AISuggestedSteps={ticketDto.AISuggestedSteps}");
+
                 var createdTicket = await _ticketService.CreateTicketAsync(ticketDto);
+
+                // Log the created ticket
+                Console.WriteLine($"Created Ticket: Id={createdTicket.Id}, Title={createdTicket.Title}, Description={createdTicket.Description}, Priority={createdTicket.Priority}, Email={createdTicket.Email}, StepsToReproduce={createdTicket.StepsToReproduce}, AISuggestedTitle={createdTicket.AISuggestedTitle}, AISuggestedPriority={createdTicket.AISuggestedPriority}, AISuggestedSteps={createdTicket.AISuggestedSteps}");
+
                 return CreatedAtAction(nameof(GetTicketById), new { id = createdTicket.Id }, createdTicket);
             }
             catch (Exception ex)

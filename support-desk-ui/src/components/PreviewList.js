@@ -5,7 +5,6 @@ import Typography from '@mui/material/Typography';
 import {withStyles} from '@mui/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
 import clsx from 'clsx';
-import * as React from 'react';
 import PropTypes from 'prop-types';
 
 const styles = ({palette, shape, spacing}) => ({

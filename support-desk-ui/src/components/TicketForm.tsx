@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -14,12 +14,14 @@ import {
   Paper,
   FormHelperText,
   CircularProgress,
+  IconButton,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { DropzoneDialog } from 'material-ui-dropzone';
 import { toast } from 'react-toastify';
 import AutorenewIcon from '@material-ui/icons/Autorenew';
 import { debounce } from '../utils';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 const useStyles = makeStyles((theme) => ({
   formContainer: {
@@ -65,6 +67,39 @@ const useStyles = makeStyles((theme) => ({
     right: '14px', // Adjust this value as needed
     transform: 'translateY(-50%)',
     pointerEvents: 'none', // This ensures the spinner doesn't interfere with text input
+  },
+  filePreview: {
+    marginTop: theme.spacing(2),
+    marginBottom: theme.spacing(2),
+  },
+  attachmentContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: theme.spacing(2),
+    justifyContent: 'center', // Center horizontally
+    alignItems: 'center', // Center vertically
+    minHeight: 150, // Ensure there's enough vertical space
+  },
+  attachmentItem: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    width: 120, // Adjust this value as needed
+  },
+  attachmentPreview: {
+    width: 100,
+    height: 100,
+    objectFit: 'cover',
+    marginBottom: theme.spacing(1),
+    border: `1px solid ${theme.palette.divider}`,
+    borderRadius: theme.shape.borderRadius,
+  },
+  attachmentName: {
+    maxWidth: 100,
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    textAlign: 'center',
   },
 }));
 
@@ -176,9 +211,9 @@ const TicketForm: React.FC = () => {
         });
       }
       // Include AI suggestions
-      Object.entries(aiSuggestions).forEach(([key, value]) => {
-        formData.append(`aiSuggestion_${key}`, value);
-      });
+      formData.append('aiSuggestedTitle', aiSuggestions.title);
+      formData.append('aiSuggestedPriority', aiSuggestions.priority);
+      formData.append('aiSuggestedSteps', aiSuggestions.stepsToReproduce);
 
       const response = await fetch('/api/tickets', {
         method: 'POST',
@@ -207,11 +242,35 @@ const TicketForm: React.FC = () => {
     }
   };
 
-  const handleFileChange = (files: File[] | null) => {
-    if (files) {
-      setFiles(files);
-    }
+  const handleFileChange = (newFiles: File[]) => {
+    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
     setOpenDropzone(false);
+  };
+
+  const handleFileDelete = (index: number) => {
+    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const renderAttachmentPreview = (file: File) => {
+    if (file.type.startsWith('image/')) {
+      return <img src={URL.createObjectURL(file)} alt={file.name} className={classes.attachmentPreview} />;
+    } else {
+      return (
+        <div className={classes.attachmentPreview}>
+          <Typography variant="body2" align="center">
+            No preview
+          </Typography>
+        </div>
+      );
+    }
   };
 
   const handleApplySuggestion = (field: AISuggestionField) => {
@@ -285,7 +344,7 @@ const TicketForm: React.FC = () => {
                       variant="filled"
                       fullWidth
                       multiline
-                      rows={4}
+                      minRows={4}
                       placeholder="Describe the issue, add more details for better AI suggestions"
                       error={!!errors.description}
                       helperText={errors.description?.message}
@@ -382,7 +441,7 @@ const TicketForm: React.FC = () => {
                     variant="filled"
                     fullWidth
                     multiline
-                    rows={4}
+                    minRows={4}
                     placeholder="Describe the steps to reproduce the issue"
                     error={!!errors.stepsToReproduce}
                     helperText={errors.stepsToReproduce?.message}
@@ -415,6 +474,28 @@ const TicketForm: React.FC = () => {
                 Upload Files
               </Button>
             </Grid>
+
+            {files.length > 0 && (
+              <Grid item xs={12} className={classes.filePreview}>
+                <Typography variant="h6" gutterBottom>Attached Files:</Typography>
+                <div className={classes.attachmentContainer}>
+                  {files.map((file, index) => (
+                    <div key={index} className={classes.attachmentItem}>
+                      {renderAttachmentPreview(file)}
+                      <Typography variant="caption" className={classes.attachmentName}>
+                        {file.name}
+                      </Typography>
+                      <Typography variant="caption">
+                        {formatFileSize(file.size)}
+                      </Typography>
+                      <IconButton size="small" onClick={() => handleFileDelete(index)}>
+                        <DeleteIcon />
+                      </IconButton>
+                    </div>
+                  ))}
+                </div>
+              </Grid>
+            )}
 
             <Grid item xs={12}>
               <Button

@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 import * as React from 'react';
-import Button from '@mui/material/Button';
 import DropzoneDialogBase from './DropzoneDialogBase';
 
 console.log("Current file path:", __filename);

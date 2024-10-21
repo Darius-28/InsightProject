@@ -1,15 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using SupportDesk.Application.DTOs;
 using SupportDesk.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using SupportDesk.Core.Entities; // Assuming Ticket is defined here
-using SupportDesk.Infrastructure.Data; // Assuming SupportDeskDbContext is defined here
+using SupportDesk.Core.Entities; 
+using SupportDesk.Infrastructure.Data; 
 using Microsoft.Extensions.Configuration;
-using System.IO;
-using Microsoft.AspNetCore.Http;
 
 namespace SupportDesk.Application.Services
 {
@@ -33,11 +27,6 @@ namespace SupportDesk.Application.Services
         {
             try
             {
-                // Generate AI suggestions
-                var suggestedTitle = await _aiService.GenerateTitleAsync(ticketDto.Description);
-                var suggestedPriority = await _aiService.GeneratePriorityAsync(ticketDto.Description);
-                var suggestedSteps = await _aiService.GenerateStepsToReproduceAsync(ticketDto.Description);
-
                 var ticket = new Ticket
                 {
                     Id = Guid.NewGuid(),
@@ -48,9 +37,9 @@ namespace SupportDesk.Application.Services
                     CreatedAt = DateTime.UtcNow,
                     StepsToReproduce = ticketDto.StepsToReproduce,
                     Attachments = new List<Attachment>(),
-                    AISuggestedTitle = suggestedTitle,
-                    AISuggestedPriority = suggestedPriority,
-                    AISuggestedSteps = suggestedSteps
+                    AISuggestedTitle = ticketDto.AISuggestedTitle,
+                    AISuggestedPriority = ticketDto.AISuggestedPriority,
+                    AISuggestedSteps = ticketDto.AISuggestedSteps
                 };
 
                 if (ticketDto.Attachments != null && ticketDto.Attachments.Any())
@@ -106,6 +95,9 @@ namespace SupportDesk.Application.Services
                 Priority = ticket.Priority,
                 Email = ticket.Email,
                 StepsToReproduce = ticket.StepsToReproduce,
+                AISuggestedTitle = ticket.AISuggestedTitle,
+                AISuggestedPriority = ticket.AISuggestedPriority,
+                AISuggestedSteps = ticket.AISuggestedSteps,
                 AttachmentInfos = ticket.Attachments?.Select(a => new AttachmentDto
                 {
                     FileName = a.FileName,
@@ -115,28 +107,40 @@ namespace SupportDesk.Application.Services
         }
 
         // Read
-        public async Task<TicketDto> GetTicketByIdAsync(Guid id) // Changed from int to Guid
+        public async Task<TicketDto> GetTicketByIdAsync(Guid id)
         {
             var ticket = await _context.Tickets
                 .Include(t => t.Attachments)
                 .FirstOrDefaultAsync(t => t.Id == id);
             
-            return ticket == null ? null : MapToDto(ticket);
+            if (ticket == null) return null;
+
+            return new TicketDto
+            {
+                Id = ticket.Id,
+                Title = ticket.Title,
+                Description = ticket.Description,
+                Priority = ticket.Priority,
+                Email = ticket.Email,
+                StepsToReproduce = ticket.StepsToReproduce,
+                AISuggestedTitle = ticket.AISuggestedTitle,
+                AISuggestedPriority = ticket.AISuggestedPriority,
+                AISuggestedSteps = ticket.AISuggestedSteps,
+                AttachmentInfos = ticket.Attachments?.Select(a => new AttachmentDto
+                {
+                    FileName = a.FileName,
+                    FileSize = a.FileSize
+                }).ToList() ?? new List<AttachmentDto>()
+            };
         }
 
         public async Task<List<TicketDto>> GetAllTicketsAsync()
         {
             var tickets = await _context.Tickets
-                .Select(t => new TicketDto
-                {
-                    // ... other properties
-                    AISuggestedTitle = t.AISuggestedTitle,
-                    AISuggestedPriority = t.AISuggestedPriority,
-                    AISuggestedSteps = t.AISuggestedSteps
-                })
+                .Include(t => t.Attachments)
                 .ToListAsync();
 
-            return tickets;
+            return tickets.Select(MapToDto).ToList();
         }
 
         // Update
@@ -150,6 +154,9 @@ namespace SupportDesk.Application.Services
             ticket.Priority = ticketDto.Priority;
             ticket.Email = ticketDto.Email;
             ticket.StepsToReproduce = ticketDto.StepsToReproduce;
+            ticket.AISuggestedTitle = ticketDto.AISuggestedTitle;
+            ticket.AISuggestedPriority = ticketDto.AISuggestedPriority;
+            ticket.AISuggestedSteps = ticketDto.AISuggestedSteps;
 
             _context.Tickets.Update(ticket);
             await _context.SaveChangesAsync();

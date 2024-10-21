@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace SupportDesk.Core.Entities
 {
     public class Ticket
@@ -10,12 +7,12 @@ namespace SupportDesk.Core.Entities
         public string Description { get; set; }
         public string Priority { get; set; }
         public string Email { get; set; }
-        public DateTime CreatedAt { get; set; }
         public string StepsToReproduce { get; set; }
-        public List<Attachment> Attachments { get; set; } = new List<Attachment>();
         public string AISuggestedTitle { get; set; }
         public string AISuggestedPriority { get; set; }
         public string AISuggestedSteps { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public List<Attachment> Attachments { get; set; } = new List<Attachment>();
     }
 
     public class Attachment
