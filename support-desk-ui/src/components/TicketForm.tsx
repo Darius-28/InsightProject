@@ -22,6 +22,7 @@ import { toast } from 'react-toastify';
 import AutorenewIcon from '@material-ui/icons/Autorenew';
 import { debounce } from '../utils';
 import DeleteIcon from '@material-ui/icons/Delete';
+import CloseIcon from '@material-ui/icons/Close';
 
 const useStyles = makeStyles((theme) => ({
   formContainer: {
@@ -132,6 +133,11 @@ const TicketForm: React.FC = () => {
   });
   const [originalInputs, setOriginalInputs] = useState<Partial<IFormInput>>({});
   const [aiLoading, setAiLoading] = useState(false);
+  const [dismissedSuggestions, setDismissedSuggestions] = useState<Record<AISuggestionField, boolean>>({
+    title: false,
+    priority: false,
+    stepsToReproduce: false
+  });
 
   const schema = yup.object().shape({
     title: yup.string().required('Title is required'),
@@ -287,6 +293,11 @@ const TicketForm: React.FC = () => {
     }
   };
 
+  const handleDismissSuggestion = (field: AISuggestionField) => {
+    setDismissedSuggestions(prev => ({ ...prev, [field]: true }));
+    toast.info(`AI suggestion dismissed for ${field}`);
+  };
+
   return (
     <div className={classes.formContainer}>
       <Paper className={classes.paper}>
@@ -313,7 +324,7 @@ const TicketForm: React.FC = () => {
                   />
                 )}
               />
-              {aiSuggestions.title && (
+              {aiSuggestions.title && !dismissedSuggestions.title && (
                 <div className={classes.suggestionContainer}>
                   <Typography variant="body2">
                     AI Suggestion: {aiSuggestions.title}
@@ -326,6 +337,13 @@ const TicketForm: React.FC = () => {
                   >
                     {fieldStates.title === 'ai' ? 'Revert' : 'Apply AI'}
                   </Button>
+                  <IconButton
+                    size="small"
+                    onClick={() => handleDismissSuggestion('title')}
+                    aria-label="dismiss suggestion"
+                  >
+                    <CloseIcon />
+                  </IconButton>
                 </div>
               )}
             </Grid>
@@ -391,7 +409,7 @@ const TicketForm: React.FC = () => {
                   <FormHelperText error>{errors.priority.message}</FormHelperText>
                 )}
               </FormControl>
-              {aiSuggestions.priority && (
+              {aiSuggestions.priority && !dismissedSuggestions.priority && (
                 <div className={classes.suggestionContainer}>
                   <Typography variant="body2">
                     AI Suggestion: {aiSuggestions.priority}
@@ -404,6 +422,13 @@ const TicketForm: React.FC = () => {
                   >
                     {fieldStates.priority === 'ai' ? 'Revert' : 'Apply AI'}
                   </Button>
+                  <IconButton
+                    size="small"
+                    onClick={() => handleDismissSuggestion('priority')}
+                    aria-label="dismiss suggestion"
+                  >
+                    <CloseIcon />
+                  </IconButton>
                 </div>
               )}
             </Grid>
@@ -448,7 +473,7 @@ const TicketForm: React.FC = () => {
                   />
                 )}
               />
-              {aiSuggestions.stepsToReproduce && (
+              {aiSuggestions.stepsToReproduce && !dismissedSuggestions.stepsToReproduce && (
                 <div className={classes.suggestionContainer}>
                   <Typography variant="body2">
                     AI Suggestion: {aiSuggestions.stepsToReproduce}
@@ -461,6 +486,13 @@ const TicketForm: React.FC = () => {
                   >
                     {fieldStates.stepsToReproduce === 'ai' ? 'Revert' : 'Apply AI'}
                   </Button>
+                  <IconButton
+                    size="small"
+                    onClick={() => handleDismissSuggestion('stepsToReproduce')}
+                    aria-label="dismiss suggestion"
+                  >
+                    <CloseIcon />
+                  </IconButton>
                 </div>
               )}
             </Grid>
