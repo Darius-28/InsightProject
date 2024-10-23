@@ -39,7 +39,21 @@ namespace SupportDesk.Infrastructure.Migrations
 
                     b.HasIndex("TicketId");
 
-                    b.ToTable("Attachment");
+                    b.ToTable("Attachments");
+                });
+
+            modelBuilder.Entity("SupportDesk.Core.Entities.Category", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("SupportDesk.Core.Entities.Ticket", b =>
@@ -55,6 +69,10 @@ namespace SupportDesk.Infrastructure.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("AISuggestedTitle")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Category")
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")

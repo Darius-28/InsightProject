@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using SupportDesk.Application.DTOs;
 using SupportDesk.Application.Interfaces;
+using System;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace SupportDesk.WebAPI.Controllers
 {
@@ -10,11 +13,13 @@ namespace SupportDesk.WebAPI.Controllers
     {
         private readonly ITicketService _ticketService;
         private readonly IAIService _aiService;
+        private readonly ICategoryService _categoryService;
 
-        public TicketsController(ITicketService ticketService, IAIService aiService)
+        public TicketsController(ITicketService ticketService, IAIService aiService, ICategoryService categoryService)
         {
             _ticketService = ticketService;
             _aiService = aiService;
+            _categoryService = categoryService;
         }
 
         [HttpPost]
@@ -45,10 +50,14 @@ namespace SupportDesk.WebAPI.Controllers
                 // Log the received data
                 Console.WriteLine($"Received TicketDto: Title={ticketDto.Title}, Description={ticketDto.Description}, Priority={ticketDto.Priority}, Email={ticketDto.Email}, StepsToReproduce={ticketDto.StepsToReproduce}, AISuggestedTitle={ticketDto.AISuggestedTitle}, AISuggestedPriority={ticketDto.AISuggestedPriority}, AISuggestedSteps={ticketDto.AISuggestedSteps}");
 
+                // Get category suggestion
+                var suggestedCategory = await _aiService.SuggestCategoryAsync(ticketDto.Description);
+                ticketDto.Category = suggestedCategory;
+
                 var createdTicket = await _ticketService.CreateTicketAsync(ticketDto);
 
                 // Log the created ticket
-                Console.WriteLine($"Created Ticket: Id={createdTicket.Id}, Title={createdTicket.Title}, Description={createdTicket.Description}, Priority={createdTicket.Priority}, Email={createdTicket.Email}, StepsToReproduce={createdTicket.StepsToReproduce}, AISuggestedTitle={createdTicket.AISuggestedTitle}, AISuggestedPriority={createdTicket.AISuggestedPriority}, AISuggestedSteps={createdTicket.AISuggestedSteps}");
+                Console.WriteLine($"Created Ticket: Id={createdTicket.Id}, Title={createdTicket.Title}, Description={createdTicket.Description}, Priority={createdTicket.Priority}, Email={createdTicket.Email}, StepsToReproduce={createdTicket.StepsToReproduce}, AISuggestedTitle={createdTicket.AISuggestedTitle}, AISuggestedPriority={createdTicket.AISuggestedPriority}, AISuggestedSteps={createdTicket.AISuggestedSteps}, Category={createdTicket.Category}");
 
                 return CreatedAtAction(nameof(GetTicketById), new { id = createdTicket.Id }, createdTicket);
             }
@@ -67,12 +76,14 @@ namespace SupportDesk.WebAPI.Controllers
                 var titleSuggestion = await _aiService.GenerateTitleAsync(request.Description);
                 var prioritySuggestion = await _aiService.GeneratePriorityAsync(request.Description);
                 var stepsSuggestion = await _aiService.GenerateStepsToReproduceAsync(request.Description);
+                var categorySuggestion = await _aiService.SuggestCategoryAsync(request.Description);
 
                 return Ok(new
                 {
                     title = titleSuggestion,
                     priority = prioritySuggestion,
-                    stepsToReproduce = stepsSuggestion
+                    stepsToReproduce = stepsSuggestion,
+                    category = categorySuggestion
                 });
             }
             catch (Exception ex)
@@ -110,6 +121,31 @@ namespace SupportDesk.WebAPI.Controllers
         {
             await _ticketService.DeleteTicketAsync(id);
             return NoContent();
+        }
+
+        [HttpPut("{id}/category")]
+        public async Task<IActionResult> UpdateTicketCategory(Guid id, [FromBody] string category)
+        {
+            var ticket = await _ticketService.GetTicketByIdAsync(id);
+            if (ticket == null)
+                return NotFound();
+
+            var existingCategory = await _categoryService.GetOrCreateCategoryAsync(category);
+            ticket.Category = existingCategory.Name;
+            await _ticketService.UpdateTicketAsync(ticket);
+
+            return Ok(ticket);
+        }
+
+        [HttpGet("category/{categoryName}")]
+        public async Task<ActionResult<IEnumerable<TicketDto>>> GetTicketsByCategory(string categoryName)
+        {
+            var tickets = await _ticketService.GetTicketsByCategoryAsync(categoryName);
+            if (tickets == null || !tickets.Any())
+            {
+                return NotFound($"No tickets found for category: {categoryName}");
+            }
+            return Ok(tickets);
         }
     }
 

@@ -22,6 +22,9 @@ namespace SupportDesk.WebAPI
                 options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
             services.AddScoped<IEmailService, EmailService>();
             services.AddHttpClient<IAIService, AIService>();
+            
+            // Add this line to register IAIService
+            services.AddScoped<IAIService, AIService>();
 
             services.AddCors(options =>
             {
@@ -31,6 +34,8 @@ namespace SupportDesk.WebAPI
                         .AllowAnyMethod()
                         .AllowAnyHeader());
             });
+
+            services.AddScoped<ICategoryService, CategoryService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

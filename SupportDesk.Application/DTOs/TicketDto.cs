@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using System.Text.Json.Serialization;
+using System.Collections.Generic;
 
 namespace SupportDesk.Application.DTOs
 {
@@ -14,6 +15,8 @@ namespace SupportDesk.Application.DTOs
         public string AISuggestedTitle { get; set; }
         public string AISuggestedPriority { get; set; }
         public string AISuggestedSteps { get; set; }
+        public string Category { get; set; }
+      
         
         [JsonIgnore] // This will exclude the property from JSON serialization
         public List<IFormFile> Attachments { get; set; }

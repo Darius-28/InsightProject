@@ -12,5 +12,7 @@ namespace SupportDesk.Application.Interfaces
         Task<string> GeneratePriorityAsync(string description);
         Task<string> GenerateStepsToReproduceAsync(string description);
         Task<string> GetSuggestionAsync(string prompt);
+        Task<string> SuggestCategoryAsync(string description);
+        
     }
 }

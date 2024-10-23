@@ -1,4 +1,5 @@
 /Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/bin/Debug/net8.0/SupportDesk.Infrastructure.deps.json
+/Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/bin/Debug/net8.0/SupportDesk.Infrastructure.runtimeconfig.json
 /Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/bin/Debug/net8.0/SupportDesk.Infrastructure.dll
 /Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/bin/Debug/net8.0/SupportDesk.Infrastructure.pdb
 /Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/bin/Debug/net8.0/SupportDesk.Core.dll
@@ -13,4 +14,5 @@
 /Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/obj/Debug/net8.0/SupportDesk.Infrastructure.dll
 /Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/obj/Debug/net8.0/refint/SupportDesk.Infrastructure.dll
 /Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/obj/Debug/net8.0/SupportDesk.Infrastructure.pdb
+/Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/obj/Debug/net8.0/SupportDesk.Infrastructure.genruntimeconfig.cache
 /Users/darius_s/Documents/InsightProject/SupportDesk.Infrastructure/obj/Debug/net8.0/ref/SupportDesk.Infrastructure.dll

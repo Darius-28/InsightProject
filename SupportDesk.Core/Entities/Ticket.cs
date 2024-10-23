@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 namespace SupportDesk.Core.Entities
 {
     public class Ticket
@@ -13,6 +16,7 @@ namespace SupportDesk.Core.Entities
         public string AISuggestedSteps { get; set; }
         public DateTime CreatedAt { get; set; }
         public List<Attachment> Attachments { get; set; } = new List<Attachment>();
+        public string Category { get; set; }
     }
 
     public class Attachment
@@ -23,5 +27,11 @@ namespace SupportDesk.Core.Entities
         public long FileSize { get; set; }
         public Guid TicketId { get; set; }
         public Ticket Ticket { get; set; }
+    }
+
+    public class Category
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
     }
 }

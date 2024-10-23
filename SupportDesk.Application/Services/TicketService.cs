@@ -4,6 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using SupportDesk.Core.Entities; 
 using SupportDesk.Infrastructure.Data; 
 using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SupportDesk.Application.Services
 {
@@ -13,13 +18,15 @@ namespace SupportDesk.Application.Services
         private readonly IEmailService _emailService;
         private readonly IConfiguration _configuration;
         private readonly IAIService _aiService;
+        private readonly ICategoryService _categoryService;
 
-        public TicketService(SupportDeskDbContext context, IEmailService emailService, IConfiguration configuration, IAIService aiService)
+        public TicketService(SupportDeskDbContext context, IEmailService emailService, IConfiguration configuration, IAIService aiService, ICategoryService categoryService)
         {
             _context = context;
             _emailService = emailService;
             _configuration = configuration;
             _aiService = aiService;
+            _categoryService = categoryService;
         }
 
         // Create
@@ -27,6 +34,9 @@ namespace SupportDesk.Application.Services
         {
             try
             {
+                // Ensure the category exists
+                await _categoryService.GetOrCreateCategoryAsync(ticketDto.Category);
+
                 var ticket = new Ticket
                 {
                     Id = Guid.NewGuid(),
@@ -39,7 +49,8 @@ namespace SupportDesk.Application.Services
                     Attachments = new List<Attachment>(),
                     AISuggestedTitle = ticketDto.AISuggestedTitle,
                     AISuggestedPriority = ticketDto.AISuggestedPriority,
-                    AISuggestedSteps = ticketDto.AISuggestedSteps
+                    AISuggestedSteps = ticketDto.AISuggestedSteps,
+                    Category = ticketDto.Category // Use the single category from DTO
                 };
 
                 if (ticketDto.Attachments != null && ticketDto.Attachments.Any())
@@ -51,7 +62,7 @@ namespace SupportDesk.Application.Services
                     {
                         if (file.Length > 0)
                         {
-                            var fileName = file.FileName; // Use the original file name
+                            var fileName = file.FileName;
                             var filePath = Path.Combine(uploadPath, fileName);
                             using (var stream = new FileStream(filePath, FileMode.Create))
                             {
@@ -81,11 +92,11 @@ namespace SupportDesk.Application.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Error creating ticket: {ex.Message}");
-                throw; // Re-throw the exception to be handled by the controller
+                throw;
             }
         }
 
-        private static TicketDto MapToDto(Ticket ticket)
+        private TicketDto MapToDto(Ticket ticket)
         {
             return new TicketDto
             {
@@ -98,6 +109,7 @@ namespace SupportDesk.Application.Services
                 AISuggestedTitle = ticket.AISuggestedTitle,
                 AISuggestedPriority = ticket.AISuggestedPriority,
                 AISuggestedSteps = ticket.AISuggestedSteps,
+                Category = ticket.Category,
                 AttachmentInfos = ticket.Attachments?.Select(a => new AttachmentDto
                 {
                     FileName = a.FileName,
@@ -113,25 +125,7 @@ namespace SupportDesk.Application.Services
                 .Include(t => t.Attachments)
                 .FirstOrDefaultAsync(t => t.Id == id);
             
-            if (ticket == null) return null;
-
-            return new TicketDto
-            {
-                Id = ticket.Id,
-                Title = ticket.Title,
-                Description = ticket.Description,
-                Priority = ticket.Priority,
-                Email = ticket.Email,
-                StepsToReproduce = ticket.StepsToReproduce,
-                AISuggestedTitle = ticket.AISuggestedTitle,
-                AISuggestedPriority = ticket.AISuggestedPriority,
-                AISuggestedSteps = ticket.AISuggestedSteps,
-                AttachmentInfos = ticket.Attachments?.Select(a => new AttachmentDto
-                {
-                    FileName = a.FileName,
-                    FileSize = a.FileSize
-                }).ToList() ?? new List<AttachmentDto>()
-            };
+            return ticket == null ? null : MapToDto(ticket);
         }
 
         public async Task<List<TicketDto>> GetAllTicketsAsync()
@@ -146,7 +140,10 @@ namespace SupportDesk.Application.Services
         // Update
         public async Task UpdateTicketAsync(TicketDto ticketDto)
         {
-            var ticket = await _context.Tickets.FindAsync(ticketDto.Id);
+            var ticket = await _context.Tickets
+                .Include(t => t.Attachments)
+                .FirstOrDefaultAsync(t => t.Id == ticketDto.Id);
+
             if (ticket == null) return;
 
             ticket.Title = ticketDto.Title;
@@ -157,13 +154,14 @@ namespace SupportDesk.Application.Services
             ticket.AISuggestedTitle = ticketDto.AISuggestedTitle;
             ticket.AISuggestedPriority = ticketDto.AISuggestedPriority;
             ticket.AISuggestedSteps = ticketDto.AISuggestedSteps;
+            ticket.Category = ticketDto.Category;
 
             _context.Tickets.Update(ticket);
             await _context.SaveChangesAsync();
         }
 
         // Delete
-        public async Task DeleteTicketAsync(Guid id) // Changed from int to Guid
+        public async Task DeleteTicketAsync(Guid id)
         {
             var ticket = await _context.Tickets.FindAsync(id);
             if (ticket != null)
@@ -171,6 +169,15 @@ namespace SupportDesk.Application.Services
                 _context.Tickets.Remove(ticket);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task<List<TicketDto>> GetTicketsByCategoryAsync(string categoryName)
+        {
+            var tickets = await _context.Tickets
+                .Where(t => t.Category == categoryName)
+                .ToListAsync();
+
+            return tickets.Select(MapToDto).ToList();
         }
     }
 }

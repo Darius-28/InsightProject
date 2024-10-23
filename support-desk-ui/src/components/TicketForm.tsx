@@ -138,6 +138,7 @@ const TicketForm: React.FC = () => {
     priority: false,
     stepsToReproduce: false
   });
+  const [aiCategory, setAiCategory] = useState<string>('');
 
   const schema = yup.object().shape({
     title: yup.string().required('Title is required'),
@@ -157,6 +158,7 @@ const TicketForm: React.FC = () => {
     debounce(async (description: string) => {
       if (!description || description.length < MIN_CHARS_FOR_AI_SUGGESTION) {
         setAiSuggestions({ title: '', priority: '', stepsToReproduce: '' });
+        setAiCategory(''); // Clear the AI category
         setFieldStates({
           title: 'original',
           priority: 'original',
@@ -181,6 +183,7 @@ const TicketForm: React.FC = () => {
 
         const suggestions = await response.json();
         setAiSuggestions(suggestions);
+        setAiCategory(suggestions.category || ''); // Changed from suggestions.categories[0]
       } catch (error) {
         console.error('Error getting AI suggestions:', error);
         toast.error('Failed to generate AI suggestions. Please try again.');
@@ -192,8 +195,9 @@ const TicketForm: React.FC = () => {
 
   useEffect(() => {
     if (!descriptionValue || descriptionValue.length === 0) {
-      // Clear AI suggestions when the description is empty
+      // Clear AI suggestions and category when the description is empty
       setAiSuggestions({ title: '', priority: '', stepsToReproduce: '' });
+      setAiCategory('');
       setFieldStates({
         title: 'original',
         priority: 'original',
@@ -220,6 +224,7 @@ const TicketForm: React.FC = () => {
       formData.append('aiSuggestedTitle', aiSuggestions.title);
       formData.append('aiSuggestedPriority', aiSuggestions.priority);
       formData.append('aiSuggestedSteps', aiSuggestions.stepsToReproduce);
+      formData.append('category', aiCategory);
 
       const response = await fetch('/api/tickets', {
         method: 'POST',

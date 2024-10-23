@@ -8,6 +8,7 @@ using SupportDesk.Application.Interfaces;
 using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Retry;
+using System.Collections.Generic;
 
 namespace SupportDesk.Application.Services
 {
@@ -103,6 +104,13 @@ namespace SupportDesk.Application.Services
         public async Task<string> GetSuggestionAsync(string prompt)
         {
             return await QueryAsync(prompt);
+        }
+
+        public async Task<string> SuggestCategoryAsync(string description)
+        {
+            string prompt = $"Based on the following support ticket description, suggest the most appropriate category. Respond with a single category name. Description: {description}";
+            string response = await QueryAsync(prompt);
+            return response.Trim();
         }
     }
 
